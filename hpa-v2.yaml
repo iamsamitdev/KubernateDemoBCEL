@@ -1,0 +1,38 @@
+apiVersion: autoscaling/v2
+kind: HorizontalPodAutoscaler
+metadata:
+  name: hpa
+  namespace: default
+spec:
+  scaleTargetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: php-apache
+  minReplicas: 3
+  maxReplicas: 10
+  metrics:
+  - type: Resource
+    resource:
+      name: cpu
+      target:
+        type: Utilization
+        averageUtilization: 5 # 5% of the CPU
+  - type: Resource
+    resource:
+      name: memory
+      target:
+        type: Utilization
+        averageUtilization: 5 # 5% of the memory
+  behavior:
+    scaleDown:
+      stabilizationWindowSeconds: 60 # 1 minute
+      policies:
+      - type: Pods
+        value: 3 # 1 pod
+        periodSeconds: 60 # 1 minute
+    scaleUp:
+      stabilizationWindowSeconds: 60 # 1 minute
+      policies:
+      - type: Percent
+        value: 10 # 10% of the pods
+        periodSeconds: 60 # 1 minute
